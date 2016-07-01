@@ -14,7 +14,7 @@
 
 ###Guest Setup
 ---------------
-1) Run ./StartMB.sh.<br/>
+1) Install ivshmem device drver.<br/>
 2) Now register or quit hypervisor services using commands defined below,<br/>
 	sudo ./a.out -w "@....command.....@"<br/>
 	
