@@ -3,6 +3,7 @@
 ###Host Setup
 --------------
 1) Add a hook in the br_handle_frame_finish function in /net/bridge/br_input.c file. Use a flag variable to receive the kernel module output for a specific packet.<br/>
+2) Add a sytemcall, catshsyscall.c. <br/> 
 2) Reboot. <br/>
 3) Run ./bridge_setup.sh.<br/>
 4) Start a virtual machine,<br/>
