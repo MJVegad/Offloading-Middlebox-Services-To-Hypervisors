@@ -2,13 +2,15 @@
 
 ###Host Setup
 --------------
-1) Run ./bridge_setup.sh.<br/>
-2) Start a virtual machine,<br/>
+1) Add a hook in the br_handle_frame_finish function in /net/bridge/br_input.c file. Use a flag variable to receive the kernel module output for a specific packet.<br/>
+2) Reboot. <br/>
+3) Run ./bridge_setup.sh.<br/>
+4) Start a virtual machine,<br/>
 	qemu-system-x86_64 sandbox.img -m 2048 -enable-kvm -device ivshmem,shm=ivshmem,size=1 -net bridge,br=kvmbr0 -net nic,model=virtio<br/>
-3) Provide the filtering and the load balancer services at the hypervisor.<br/>
+5) Provide the filtering and the load balancer services at the hypervisor.<br/>
 	sudo insmod bfilter.ko<br/>
 	sudo insmod bloadbal.ko<br/>
-4) Periodically listen to the middleboxes,<br/>
+6) Periodically listen to the middleboxes,<br/>
 	gcc readSHM.c -lrt<br/>
 	sudo ./a.out<br/>
 
