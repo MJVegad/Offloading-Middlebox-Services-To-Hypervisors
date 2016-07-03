@@ -12,9 +12,13 @@ EXPORT_SYMBOL(mymb);
 
 struct kfifo commandQ;
 
-// head node of middlebox linked list
+// head node of Firewall middlebox state linked list
 struct mbState mbState_list;
 EXPORT_SYMBOL(mbState_list);
+
+// head node of Load balancer middlebox state linked list
+struct mbState1 mbState_list1;
+EXPORT_SYMBOL(mbState_list1);
 
 // mutex for middlebox state linked list access 
 //struct mutex mbllmutex;
@@ -36,29 +40,150 @@ asmlinkage long sys_catsh(const char* newdata)
         const char *delim = " ";
         char *token;	
 
+	//To initialize the mbState linked list;
+    //    INIT_LIST_HEAD(&mbState_list.list);
+	
+	//struct mbState *temp;
+/*	temp = kmalloc(sizeof(*temp), GFP_KERNEL);
+	strcpy(temp->macaddr,newdata);
+
+	list_add(&temp->list,&mbState_list.list);
+*/
+	//struct list_head *ptr;
+        //struct mbState *entry;
+	
+/*	 list_for_each(ptr,&mbState_list.list) {
+                entry = list_entry(ptr, struct mbState, list);
+                printk(KERN_ALERT "command:%s\n", entry->macaddr);
+	}
+*/
+	/* Tokenizing the command to store update the linkedlist */
+/*	token = strsep(&strp, delim);
+	printk(KERN_ALERT "token1 = '%s', ", token);
+	token = strsep(&strp, delim);
+        printk(KERN_ALERT "token2 = '%s', ", token);
+	token = strsep(&strp, delim);
+        printk(KERN_ALERT "token3 = '%s\n', ", token);
+*/	
+	
+/*	//To initialize the commandQ
+        kfifo_alloc(&commandQ,4096,GFP_KERNEL);
+
+	mymb = kmalloc(sizeof(*mymb), GFP_KERNEL);	
+	//strcpy(mymb->mbinfo, newdata);
+	//printk(KERN_ALERT "%s\n", mymb->mbinfo);
+	kfifo_in(&commandQ,newdata,sizeof(newdata));
+i
+	i=kfifo_out(&commandQ, buf, 5);
+
+	 printk(KERN_INFO "buf: %s\n", buf);
+*/
+
+	// Test case: Add, Delete, Quit operation
+/*	char s1[]="12:13:14:15:16:17";
+	char s2[]="1:2:3:4"; 
+	struct mbState *temp4;
+	temp4 = kmalloc(sizeof(*temp4), GFP_KERNEL);
+ 	strcpy(temp4->macaddr,s1);
+        	//printk(KERN_ALERT "token1 = '%s', ", token);
+        	strcpy(temp4->ipaddr,s2);
+        	//printk(KERN_ALERT "token2 = '%s', ", token);
+		temp4->ipfilters=1;
+		temp4->macfilters=7;
+		temp4->tcpfilters=3;
+
+		list_add(&temp4->list,&mbState_list.list); 
+
+
+	char s3[]="11:11:11:11:11:11";
+	char s4[]="5:6:7:8"; 
+	struct mbState *temp5;
+	temp5 = kmalloc(sizeof(*temp5), GFP_KERNEL);
+ 	strcpy(temp5->macaddr,s3);
+        	//printk(KERN_ALERT "token1 = '%s', ", token);
+        	strcpy(temp5->ipaddr,s4);
+        	//printk(KERN_ALERT "token2 = '%s', ", token);
+		temp5->ipfilters=0;
+		temp5->macfilters=0;
+		temp5->tcpfilters=0;
+
+		list_add(&temp5->list,&mbState_list.list); 	
+
+	struct list_head *ptr1;
+    struct mbState *entry1;
+	printk(KERN_ALERT "Middleboxes registered.\n==============================\n");
+	 list_for_each(ptr1,&mbState_list.list) {
+                entry1 = list_entry(ptr1, struct mbState, list);
+                printk(KERN_ALERT "Node:%s,%s || ipfilters:%ld || macfilters:%ld || tcpfilters:%ld\n", entry1->macaddr, entry1->ipaddr, entry1->ipfilters, entry1->macfilters, entry1->tcpfilters);
+	}
+*/
+/* Actual system call logic starts here */
 	token = strsep(&strp, delim);
        
        // printk(KERN_ALERT "token1 = '%s', ", token);
 
+	/* Firewall or Load Balancer */
+	char *serviceType;
+
 	if (strcmp(token,"R")==0)
 	{
-		struct mbState *temp;
+		serviceType = strsep(&strp, delim);
+		if (strcmp(serviceType,"F")==0)
+		{	
+			struct mbState *temp;
         	temp = kmalloc(sizeof(*temp), GFP_KERNEL);
         	strcpy(temp->macaddr,strsep(&strp, delim));
         	//printk(KERN_ALERT "token1 = '%s', ", token);
         	strcpy(temp->ipaddr,strsep(&strp, delim));
         	//printk(KERN_ALERT "token2 = '%s', ", token);
-		temp->ipfilters=0;
-		temp->macfilters=0;
-		temp->tcpfilters=0;
+			temp->ipfilters=0;
+			temp->macfilters=0;
+			temp->tcpfilters=0;
 
-		mutex_init(&temp->node);
+			mutex_init(&temp->node);
 
-		//mutex_lock(&mbllmutex);
-		list_add(&temp->list,&mbState_list.list);
-		//mutex_unlock(&mbllmutex);
-		 printk(KERN_ALERT "New MB Registered.\nNode:%s,%s || ipfilters:%ld || macfilters:%ld || tcpfilters:%ld\n", temp->macaddr, temp->ipaddr, temp->ipfilters, temp->macfilters, temp->tcpfilters);
+			//mutex_lock(&mbllmutex);
+			list_add(&temp->list,&mbState_list.list);
+			//mutex_unlock(&mbllmutex);
+		 	printk(KERN_ALERT "New MB Registered for Firewall service.\nNode:%s,%s || ipfilters:%ld || macfilters:%ld || tcpfilters:%ld\n", temp->macaddr, temp->ipaddr, temp->ipfilters, temp->macfilters, temp->tcpfilters);
+		} else if (strcmp(serviceType,"L")==0)
+		{
+			struct mbState1 *temp;
+        		temp = kmalloc(sizeof(*temp), GFP_KERNEL);
+        		printk(KERN_ALERT "Inside serviceType L.\n");
+        		strcpy(temp->macaddr,strsep(&strp, delim));
+        		//printk(KERN_ALERT "token1 = '%s', ", token);
+        		strcpy(temp->ipaddr,strsep(&strp, delim));
+        		//printk(KERN_ALERT "token2 = '%s', ", token);
+			long val=0;
+			int i = kstrtol(strsep(&strp, delim),10,&val);
+			if (i!=0)
+			{	printk(KERN_ALERT "kstrtol failed.\n");
+				return 0;
+			}
+			printk(KERN_ALERT "balanceType value is:%ld\n", val);
+			if(val == 0)
+			{			
+				strcpy(temp->destip,strsep(&strp, delim));
+				temp->balanceType = val;		
+				printk(KERN_ALERT "destip set is:%s\n", temp->destip);		
 
+			} else if (val == 1)
+			{
+				strcpy(temp->srcip,strsep(&strp, delim));
+				strcpy(temp->destip,strsep(&strp, delim));
+				temp->balanceType = val;
+			} else {
+				printk(KERN_ALERT "Invalid balance type.\n");
+			}	
+			mutex_init(&temp->node);
+			//mutex_lock(&mbllmutex);
+			list_add(&temp->list,&mbState_list1.list);
+			//mutex_unlock(&mbllmutex);
+		 	printk(KERN_ALERT "New MB Registered for Load balancer service.\nNode:%s,%s || balanceType:%ld\n", temp->macaddr, temp->ipaddr, temp->balanceType);
+		} else {
+			printk(KERN_ALERT "Service not available yet.\n");
+		}
 	}
 	else if(strcmp(token,"A")==0)
 	{
@@ -385,8 +510,12 @@ asmlinkage long sys_catsh(const char* newdata)
 		struct list_head *ptr;
 	    struct mbState *entry;
 	    int flag=0;
+
 		char *temp = strsep(&strp, delim);
 
+		char *temp1 = strsep(&strp, delim);
+
+		if (strcmp(temp1,"F")==0 || strcmp(temp1,"A")==0) {
 		list_for_each(ptr,&mbState_list.list) {
             entry = list_entry(ptr, struct mbState, list);
             int m1=0;
@@ -403,7 +532,25 @@ asmlinkage long sys_catsh(const char* newdata)
             if (m1==0)
             	mutex_unlock(&entry->node);		
         }  
-
+        }
+        if (strcmp(temp1,"L")==0 || strcmp(temp1,"A")==0) { 
+        list_for_each(ptr,&mbState_list1.list) {
+            entry = list_entry(ptr, struct mbState1, list);
+            int m1=0;
+            mutex_lock(&entry->node);
+            if(strcmp(entry->macaddr,temp)==0)
+			{
+				m1=1;
+				printk(KERN_ALERT "Registration canceled for the MB:%s\n", entry->macaddr);
+            	list_del(&entry->list);
+            	mutex_unlock(&entry->node);
+            	flag=1;
+            	break;
+            }
+            if (m1==0)
+            	mutex_unlock(&entry->node);		
+        }  
+    }
         if(flag==0)
         	printk(KERN_ALERT "Middlebox not registered for the service.\n");  	
 	}
